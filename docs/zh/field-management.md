@@ -252,9 +252,18 @@ class uEditor extends Field
     public function render()
     {
         $this->script = <<<EOT
+        //这句是为了清了之前的组件，不然第二次进入会加载不出来编辑器
+        UE.delEditor("ueditor");
         var ue = UE.getEditor('ueditor'); // 默认id是ueditor
         ue.ready(function () {
             ue.execCommand('serverparam', '_token', '{{ csrf_token() }}');
+        });
+        //这段是为了销毁他，页面会闪出来一个textarea，丑点
+        //如果不这么搞编辑保存回到列表再点编辑会变成你上次修改之样的样子
+        $(document).on('pjax:send', function(xhr) {
+             if(typeof(UE.getEditor("ueditor")) !='undefined'){
+                UE.getEditor("ueditor").destroy();
+             }
         });
 EOT;
         return parent::render();
